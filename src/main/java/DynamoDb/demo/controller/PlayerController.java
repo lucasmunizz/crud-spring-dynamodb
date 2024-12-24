@@ -63,4 +63,45 @@ public class PlayerController {
         return entity == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(entity);
     }
 
+    @DeleteMapping("/{playerId}/games/{gameId}")
+    public ResponseEntity<Void> delete(@PathVariable("playerId") String playerId,
+                                       @PathVariable("gameId") String gameId) {
+        var key = Key.builder()
+                .partitionValue(playerId)
+                .sortValue(gameId)
+                .build();
+
+        var player = dynamoDbTemplate.load(key, PlayerHistoryEntity.class);
+
+        if (player == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        dynamoDbTemplate.delete(key, PlayerHistoryEntity.class);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{playerId}/games/{gameId}")
+    public ResponseEntity<Void> update(@PathVariable("playerId") String playerId,
+                                       @PathVariable("gameId") String gameId,
+                                       @RequestBody ScoreDto scoreDto) {
+        var key = Key.builder()
+                .partitionValue(playerId)
+                .sortValue(gameId)
+                .build();
+
+        var player = dynamoDbTemplate.load(key, PlayerHistoryEntity.class);
+
+        if (player == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        player.setScore(scoreDto.score());
+
+        dynamoDbTemplate.save(player);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }
