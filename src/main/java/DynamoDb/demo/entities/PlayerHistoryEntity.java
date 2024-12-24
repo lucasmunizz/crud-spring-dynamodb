@@ -1,5 +1,6 @@
 package DynamoDb.demo.entities;
 
+import DynamoDb.demo.dto.ScoreDto;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttribute;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
@@ -19,8 +20,19 @@ public class PlayerHistoryEntity {
 
     private Instant created_at;
 
-    @DynamoDbAttribute("username")
+    public static PlayerHistoryEntity fromScore(String username, ScoreDto scoreDto){
+
+        var entity = new PlayerHistoryEntity();
+        entity.setUsername(username);
+        entity.setGameId(UUID.randomUUID());
+        entity.setScore(scoreDto.score());
+        entity.setCreated_at(Instant.now());
+
+        return entity;
+    }
+
     @DynamoDbPartitionKey
+    @DynamoDbAttribute("username")
     public String getUsername(){
         return username;
     }
@@ -29,8 +41,8 @@ public class PlayerHistoryEntity {
         this.username = username;
     }
 
-    @DynamoDbAttribute("game_id")
     @DynamoDbSortKey
+    @DynamoDbAttribute("game_id")
     public UUID getGameId() {
         return gameId;
     }
